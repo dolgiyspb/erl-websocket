@@ -1,0 +1,12 @@
+{application, erlang_socket,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erlang_socket_app, []}},
+  {env, [ { port, 8090 } ]}
+ ]}.
