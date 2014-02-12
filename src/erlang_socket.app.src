@@ -8,5 +8,5 @@
                   stdlib
                  ]},
   {mod, { erlang_socket_app, []}},
-  {env, [ { port, 8090 } ]}
+  {env, [ { port, 8091 } ]}
  ]}.
