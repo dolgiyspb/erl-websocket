@@ -44,15 +44,17 @@ accept_websocket_connection({ { headers, Headers }, _Body}, Socket) ->
 	{ ?WEBSOCKET_KEY_HEADER, WebsocketKey} = header_parser:get_header(?WEBSOCKET_KEY_HEADER, Headers),
 	KeyWithGuid = <<WebsocketKey/bits, ?GUID_STRING/bits>>,
 	AcceptString = make_accept_websocket_connection_string(binary:list_to_bin(base64:encode_to_string(crypto:sha(KeyWithGuid))), <<"chat">>), 
-	gen_tcp:send(Socket, AcceptString),
+	send(Socket, AcceptString),
 	io:format("~p~n", [KeyWithGuid]).
 
+send(Socket, Message) ->
+	ok = gen_tcp:send(Socket, Message),
+	ok = inet:setopts(Socket, [{active, once}]),
+	ok.
+
 make_accept_websocket_connection_string(SecKey, Proto) ->
-	<<"HTTP/1.1 101 Switching Protocols\r\n
-	Upgrade: websocket\r\n
-	Connection: Upgrade\r\n
-	Sec-WebSocket-Accept: ",  SecKey/bits,
-	"\r\nSec-WebSocket-Protocol: ", Proto/bits ,"\n\n">>.
+	<<"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ",  SecKey/bits, "\r\n\r\n">>.
+	%"\r\nSec-WebSocket-Protocol: ", Proto/bits ,"\n\n">>.
 
 handle_request(Request) ->
 	Request.
