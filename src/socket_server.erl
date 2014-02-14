@@ -30,7 +30,7 @@ handle_cast(accept, S = #state{ socket = ListenSocket }) ->
 
 handle_info({tcp, Socket, Str}, State) ->	
 	io:format("~p~n", [request_parser:parse_request(Str)]),
-	Request = request_parser:parse_request(Str),
+	Request = request_parser:parse_request(Str),	
 	accept_websocket_connection(Request, Socket),
 	{noreply, State}.
 
