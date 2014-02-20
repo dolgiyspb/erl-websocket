@@ -3,7 +3,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/1, start_socket_server/0]).
+-export([start_link/1, start_socket_server/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -16,7 +16,8 @@
 %% ===================================================================
 
 start_link(Args) ->	
-    supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
+    %supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
+    supervisor:start_link(?MODULE, Args).
 
 %% ===================================================================
 %% Supervisor callbacks
@@ -26,14 +27,15 @@ init(Args) ->
 	io:format("Init application~n"),
 	%{ok, Port} = application:get_env(port),
 	%{ok, Socket} = gen_tcp:listen(Port, [ binary, {active, once} ]),
-	spawn_link(fun spawn_listeners/0),
-    {ok, { {simple_one_for_one, 5, 10}, [ ?CHILD(socket_server, worker, [Args#args.socket]) ]} }.
+	Pid = self(),
+	spawn_link( fun () -> spawn_listeners(Pid) end ),
+    {ok, { {simple_one_for_one, 5, 10}, [ ?CHILD(socket_server, worker, [Args#state{ pid = Pid }]) ]} }.
 
 
-spawn_listeners() ->
-	[start_socket_server() || _ <- lists:seq(1,20)],
+spawn_listeners(Pid) ->
+	[start_socket_server(Pid) || _ <- lists:seq(1,20)],
 	ok.
 
-start_socket_server() ->	
-	{ok, _Child} = supervisor:start_child(?MODULE, []).
+start_socket_server(Pid) ->	
+	{ok, _Child} = supervisor:start_child(Pid, []).
 

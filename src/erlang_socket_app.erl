@@ -15,7 +15,7 @@ start(_StartType, _StartArgs) ->
 	application:start(crypto),
 	{ok, Port} = application:get_env(port),
 	{ok, Socket} = gen_tcp:listen(Port, [ binary, {active, once} ]),
-    {ok, Pid} = erlang_socket_sup:start_link( #args{ socket=Socket } ),
+    {ok, Pid} = erlang_socket_sup:start_link( #state{ socket=Socket } ),
     {ok, Pid, #application_state{socket = Socket}}.
 
 stop(State) ->
